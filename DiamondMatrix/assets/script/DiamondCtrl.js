@@ -75,9 +75,11 @@ cc.Class({
         }
 
         if(this._gameCtrl.getAchiveNum() == 4){
-            VDGameScore += 20;
+            !this._gameCtrl.getGuideStatus() ? VDGameScore += 20 : null;
             this._gameCtrl.gotoNextLevel();
         }
+
+        this._gameCtrl.getGuideStatus() ? this._gameCtrl.resetMaskPosition() : null;
         
     },
 

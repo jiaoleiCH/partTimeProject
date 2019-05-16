@@ -32,7 +32,7 @@ cc.Class({
 
     initData () {
         this._signList = [];
-        GameTime = 120;
+        GameTime = 30;
         GameLevel = 1;
         VDGameScore = 0;
         window.GameOver = false;

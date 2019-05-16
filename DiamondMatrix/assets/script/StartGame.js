@@ -12,10 +12,15 @@ cc.Class({
     },
 
     init () {
+        this.initData();
         this.startEvent();
         this.beganBtn.on('click',this.startGame,this);
         this.rankBtn.on('click',this.rankEvent,this);
         this.shareBtn.on('click',this.shareEvent,this);
+    },
+
+    initData () {
+        this._rankCtrl = this.rankNode.getComponent("RankCtrl").init();
     },
 
     startEvent () {

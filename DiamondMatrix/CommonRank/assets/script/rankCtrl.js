@@ -125,7 +125,7 @@ cc.Class({
                         readAllData.push(data[i]);
                     }
                 }
-                // console.log("真正的好友数据:", readAllData,data);
+                console.log("真正的好友数据:", readAllData,data,res);
                 readAllData.sort((a, b) => {
                     if (a.KVDataList.length == 0 && b.KVDataList.length == 0) {
                         return 0;

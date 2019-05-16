@@ -57,7 +57,7 @@ cc.Class({
 
         window.TargetIndex = 0;
         window.MlyAppid = "wx62442cceb6dba222";
-        window.VDWecharKey = 'diamondRank_online';
+        window.VDWecharKey = 'animalMaze';
     },
 
     goGame () {

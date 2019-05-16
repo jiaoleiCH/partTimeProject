@@ -11,10 +11,10 @@ cc.Class({
         overGame : cc.Node,
         targetDiamond : cc.Sprite,
         ruleNode : cc.Node,
-        ruleScroll : cc.ScrollView,
-        ruleItemPre : cc.Prefab,
+        ruleBeganBtn : cc.Node,
         perfectNode : cc.Node,
         newPlayerNode : cc.Node,
+        maskNode : cc.Node,
         diamondFrame : {
             default : [],
             type : cc.SpriteFrame
@@ -39,10 +39,11 @@ cc.Class({
         }
         this.fixResolution();
         this.initData();
+        this.initClickEvent();
         // this.initGameRule();
         this.initGuide();
         this.initUi();
-        this.initDiamond();
+        // this.initDiamond();
         this.schedule(this.timeSchedule ,1);
     },
 
@@ -67,6 +68,20 @@ cc.Class({
         this._achiveNum = 0;
         this._diamondArr = ['red','red','red','red','green','green','green','green','blue','blue','blue','blue','gray','gray','gray'];
         this._arrangement = [[0,1,2,3],[4,5,6,7],[8,9,10,11],[12,13,14,15],[0,4,8,12],[1,5,9,13],[2,6,10,14],[3,7,11,15],[0,1,4,5],[2,3,6,7],[8,9,12,13],[10,11,14,15],[5,6,9,10]];
+
+        this._guideTargetDiamond = [];
+        this._diamondFeildArr = [];
+        this._is_guide_status = false;
+        this._guideStepIndex = 0;
+    },
+
+    initClickEvent () {
+        this.ruleBeganBtn.on('click',this.beganGame,this);
+    },
+
+    beganGame () {
+        this.ruleNode.active = false;
+        this._isBegan = true;  
     },
 
     initGuide () {
@@ -74,56 +89,16 @@ cc.Class({
         // console.log('initGuide' ,initGuide);
         if(!initGuide || initGuide != 'yes'){
             VDUtils2.setLocalData('initGuide', "yes");
-            this.newPlayerNode.active = true;
+            this.initNewPlayerDiamond();
         }else{
-            this.newPlayerNode.active = false;
-            // this.initGameRule();
+            this.initDiamond(); 
+            this.ruleNode.active = true;
         }
-    },
-
-    initGameRule () {
-        let isNewPlayer = VDUtils2.getLocalData('isNewPlayer');
-        if(!isNewPlayer || isNewPlayer == 'yes'){
-            VDUtils2.setLocalData('isNewPlayer', "yes");
-            this._isBegan = false;
-            this.ruleNode.getChildByName('layout').on('click',this.newPlayerEvent,this);
-        }else{
-            this._isBegan = true;
-        }
-        this.initRuleConfig();
-        this.ruleNode.active = !this._isBegan;
-        // if(this._isBegan && (!VdIsRelife || AgainGame)) this.initGameLevel();
-    },
-
-    initRuleConfig () {
-        let config = [];
-        config = VDData.businessConfig.activityRule ? JSON.parse(VDData.businessConfig.activityRule) : ruleConfig;
-        this.ruleScroll.content.destroyAllChildren();
-        for(let i = 0 ; i < config.length; i++) {
-            let itemNode = cc.instantiate(this.ruleItemPre);
-            itemNode.getChildByName('content').getComponent(cc.Label).string = config[i];
-            this.ruleScroll.content.addChild(itemNode);
-            this.scheduleOnce(() => {
-                let H = itemNode.getChildByName('content').height;
-                itemNode.height = H;
-            }, 1 / 60.0);
-        }
-        let state = VDData.businessConfig.activityState ? VDData.businessConfig.activityState : '1';
-        this.ruleNode.active = state == "1" ? true : false;
-        
-    },
-
-    newPlayerEvent () {
-        VDUtils2.setLocalData('isNewPlayer', "no");
-        this._isBegan = true;
-        this.ruleNode.active = false;
-        // this.initGameLevel(GameLevel);
-        this.ruleNode.getChildByName('layout').off('click',this.newPlayerEvent,this);
     },
 
     initUi () {
         this.setGameTime();
-        this.scoreLab.string = VDGameScore;
+        this.setScore();
         this.overGame.getComponent('OverGame').init(this);
     },
 
@@ -132,35 +107,38 @@ cc.Class({
         let arrangeObj = {};
         arrangeObj.arrange = this._arrangement[rand];
         arrangeObj.index = rand;
-        this.createDiamondFeild(arrangeObj, (diamondFeildArr) => {
+        this.createDiamondFeild(arrangeObj, 0, (diamondFeildArr) => {
             this.createDrawDireLine(diamondFeildArr,arrangeObj);
         });
         
     },
 
-    createDiamondFeild (arrangeObj,callback) {
+    createDiamondFeild (arrangeObj,nullNumber,callback) {
         this.clearDiamond();
-        TargetIndex = VDUtils.randint(0,2);
+        TargetIndex = nullNumber == 0 ? VDUtils.randint(0,2) : 1;
         this.targetDiamond.spriteFrame = this.diamondFrame[TargetIndex];
-        let diamondArrange = VDUtils.shuffle(this._diamondArr);
-        let diamondFeildArr = [];
+        let diamondArrange = (nullNumber == 0) ? VDUtils.shuffle(this._diamondArr) : ['red','green','red','blue','red',,'red','green','gray','blue','gray','green','blue','green','gray','blue'];
+        this._diamondFeildArr = [];
         let index = 0;
         for (var i = 0; i < this._diamondNum.raw; i++) {
             for (var j = 0; j < this._diamondNum.col; j++) {
                 let diamondFeild = VDNodeCache.GetNodeByType(VDNodeCache.Config.diamondFeild);
                 diamondFeild.getComponent('DiamondFeildCtrl').init(this,index,arrangeObj.arrange);
+                diamondFeild.index = i + '_' + j;
                 diamondFeild.position = cc.v2(-this.diamondLayout.width * 0.5 + diamondFeild.width * 0.5 + 10 + (10 + diamondFeild.width) * j , 
                                         this.diamondLayout.height * 0.5 - 15 - diamondFeild.height* 0.5 - (10 + diamondFeild.height) * i);
                 this.diamondLayout.addChild(diamondFeild);
-                diamondFeildArr.push(diamondFeild);
+                this._diamondFeildArr.push(diamondFeild);
                 
-                if(index != 0){
-                    this.createDiamond(diamondFeild,diamondArrange[index-1],index);
+                if(index != nullNumber){
+                    let _index = nullNumber == 0 ? index - 1 : index;
+                    this.createDiamond(diamondFeild,diamondArrange[_index],index);
+                    console.log('index === > ' ,index);
                 }
                 index++;
 
                 if(index == this._diamondNum.raw * this._diamondNum.col){
-                    callback ? callback(diamondFeildArr) : null;
+                    callback ? callback(this._diamondFeildArr) : null;
                 }
             }
         }
@@ -215,6 +193,34 @@ cc.Class({
         
     },
 
+    initNewPlayerDiamond () {
+        this._is_guide_status = true;
+        this._guideTargetDiamond = [6,2,1,5,6];
+        let arrangeObj = {};
+        arrangeObj.arrange = this._arrangement[8];
+        arrangeObj.index = 8;
+        this.createDiamondFeild(arrangeObj, 5, (diamondFeildArr) => {
+            this.createDrawDireLine(diamondFeildArr,arrangeObj);
+        });
+
+        let pos = this._diamondFeildArr[this._guideTargetDiamond[this._guideStepIndex]].convertToWorldSpaceAR(cc.Vec2.ZERO);
+        this.maskNode.position = this.maskNode.parent.convertToNodeSpaceAR(pos);
+        this.maskNode.active = true;
+    },
+
+    resetMaskPosition () {
+        this._guideStepIndex++;
+        if(this._guideStepIndex >= this._guideTargetDiamond.length){
+            this.maskNode.active = false;
+            this._is_guide_status = false;
+            this._isBegan = true;
+            return;
+        }
+        let pos = this._diamondFeildArr[this._guideTargetDiamond[this._guideStepIndex]].convertToWorldSpaceAR(cc.Vec2.ZERO);
+        this.maskNode.position = this.maskNode.parent.convertToNodeSpaceAR(pos);
+        // this.maskNode.active = true;
+    },
+
     timeSchedule () {
         if(!this._isBegan) return;
         GameTime--;
@@ -248,7 +254,7 @@ cc.Class({
             let arrangeObj = {};
             arrangeObj.arrange = this._arrangement[rand];
             arrangeObj.index = rand;
-            this.createDiamondFeild(arrangeObj,(diamondFeildArr) => {
+            this.createDiamondFeild(arrangeObj, 0,(diamondFeildArr) => {
                 this.createDrawDireLine(diamondFeildArr,arrangeObj);
             });
         })));
@@ -283,10 +289,25 @@ cc.Class({
 
     setBeganGame (f) {
         this._isBegan = f;
-        this.ruleNode.active = false;
         if(f){
             this.schedule(this.timeSchedule ,1);
         }
     },
+
+    getGuideStatus () {
+        return this._is_guide_status;
+    },
+
+    againGame (func) {
+        VDGameScore = 0;
+        GameTime = 30;
+        this.initData();
+        this.setScore();
+        this.setGameTime();
+        this.initDiamond();
+        this.setBeganGame(true);
+        func ? func() : null;
+        console.log('再来一局');
+    }
     
 });

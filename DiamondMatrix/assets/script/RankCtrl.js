@@ -9,14 +9,14 @@ cc.Class({
         closeBtn : cc.Node,
     },
 
-    init (gameCtrl) {
-        this.initData(gameCtrl);
+    init () {
+        this.initData();
         this.initClickEvent();
         return this;
     },
 
-    initData (gameCtrl) {
-        this._gameCtrl = gameCtrl;
+    initData () {
+        
     },
 
     initClickEvent () {
@@ -32,8 +32,6 @@ cc.Class({
     },
 
     friendRankEvent () {
-        this.friendRankBtn.getComponent(cc.Sprite).spriteFrame = this.btnFrame[1];
-        this.worldRankBtn.getComponent(cc.Sprite).spriteFrame = this.btnFrame[2];
         VDWeChat.sendMessage({
             messageType: 1,
             friendDataKVkey: VDWecharKey,

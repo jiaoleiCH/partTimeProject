@@ -24,28 +24,28 @@ cc.Class({
     },
 
     updateShareData () {
-        if (cc.sys.platform == cc.sys.WECHAT_GAME) {
-            if (VDData.businessConfig.shareType == 1 || VDData.businessConfig.shareType == null) {
-                this.shareContent.string = "双倍分数";
-                this.shareContentLab = "翻倍";
-            } else if (VDData.businessConfig.shareType == 2) {
-                this.shareContent.string = "分享复活";
-                this.shareContentLab = "复活";
-            } else if (VDData.businessConfig.shareType == 3) {
-                this.shareContent.string = "加兑换次数";
-                this.shareContentLab = "兑换次数";
-            }
-            this.shareCountLab.string = "(今日还可分享" + this.shareContentLab + ((VDData.businessConfig.shareCount != null ? VDData.businessConfig.shareCount : 1) - VDData.shareCounts) +"次)";
-            if (VDData.businessConfig.shareFlag == "2" || !VDData.clienConfig.share) {
-                this.node.active = false;
-                this.againBtn.x = 0;
-            } else {
-                this.node.active = true;
-                this.againBtn.x = -127;
-            }
-        } else {
-            this.shareContent.active = false;
-        }
+        // if (cc.sys.platform == cc.sys.WECHAT_GAME) {
+        //     if (VDData.businessConfig.shareType == 1 || VDData.businessConfig.shareType == null) {
+        //         this.shareContent.string = "双倍分数";
+        //         this.shareContentLab = "翻倍";
+        //     } else if (VDData.businessConfig.shareType == 2) {
+        //         this.shareContent.string = "分享复活";
+        //         this.shareContentLab = "复活";
+        //     } else if (VDData.businessConfig.shareType == 3) {
+        //         this.shareContent.string = "加兑换次数";
+        //         this.shareContentLab = "兑换次数";
+        //     }
+        //     this.shareCountLab.string = "(今日还可分享" + this.shareContentLab + ((VDData.businessConfig.shareCount != null ? VDData.businessConfig.shareCount : 1) - VDData.shareCounts) +"次)";
+        //     if (VDData.businessConfig.shareFlag == "2" || !VDData.clienConfig.share) {
+        //         this.node.active = false;
+        //         this.againBtn.x = 0;
+        //     } else {
+        //         this.node.active = true;
+        //         this.againBtn.x = -127;
+        //     }
+        // } else {
+        //     this.shareContent.active = false;
+        // }
         
     },
 
